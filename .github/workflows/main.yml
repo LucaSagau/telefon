@@ -1,20 +1,4 @@
-name: Build Mobipro APK
-on: [push]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          
-      - name: Install dependencies
+- name: Build APK
         run: |
-          pip install flet==0.21.2 simpleeval
-          
-      - name: Build APK
-        run: flet build apk --assets database --assets assets
+          pip install flet simpleeval
+          flet build apk
