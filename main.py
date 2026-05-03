@@ -10,7 +10,9 @@ def main(page: ft.Page):
     page.scroll = "adaptive"
     page.padding = 20
     
-    cale_baza = "./database" 
+    # IMPORTANTE: Calea trebuie să coincidă cu structura de pe GitHub
+    # Dacă în GitHub ai assets/database/bucatarii/...
+    cale_baza = "assets/database" 
 
     # --- FUNCTII ---
     def incarca_modele(e):
@@ -23,6 +25,9 @@ def main(page: ft.Page):
             if fisiere:
                 combo_mod.value = fisiere[0]
             page.update()
+        else:
+            # Debug: afișează o eroare în pagină dacă nu găsește folderul
+            print(f"Calea nu există: {cale_cat}")
 
     def adauga_corp(e):
         try:
@@ -37,6 +42,7 @@ def main(page: ft.Page):
             
             with open(cale_json, "r", encoding="utf-8") as f:
                 data = json.load(f)
+                # Luăm prima cheie (numele corpului)
                 structura = data[list(data.keys())[0]]
 
             for p in structura.get("piese", []):
@@ -57,53 +63,61 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.Text(f"{vL} x {vl}", size=20, color="blue900", weight="bold"),
                                     ft.Text(f"{p['cantitate']} buc"),
-                                ], alignment="spaceBetween"),
+                                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                             ])
                         )
                     )
                 )
             page.update()
         except Exception as ex:
-            print(f"Eroare: {ex}")
+            # Snackbar pentru erori pe telefon
+            page.snack_bar = ft.SnackBar(ft.Text(f"Eroare: {ex}"))
+            page.snack_bar.open = True
+            page.update()
 
     # --- COMPONENTE UI ---
-    inp_L = ft.TextField(label="L", value="600", expand=1)
-    inp_H = ft.TextField(label="H", value="760", expand=1)
-    inp_A = ft.TextField(label="A", value="510", expand=1)
-    inp_HA = ft.TextField(label="HA", value="820", expand=1)
+    inp_L = ft.TextField(label="L", value="600", expand=1, keyboard_type=ft.KeyboardType.NUMBER)
+    inp_H = ft.TextField(label="H", value="760", expand=1, keyboard_type=ft.KeyboardType.NUMBER)
+    inp_A = ft.TextField(label="A", value="510", expand=1, keyboard_type=ft.KeyboardType.NUMBER)
+    inp_HA = ft.TextField(label="HA", value="820", expand=1, keyboard_type=ft.KeyboardType.NUMBER)
 
-    # Incarcare categorii
     cats = []
     if os.path.exists(cale_baza):
         cats = [ft.dropdown.Option(d) for d in os.listdir(cale_baza) if os.path.isdir(os.path.join(cale_baza, d))]
 
-    # DEFINIRE DROPDOWN (Fara on_change in init pentru a evita eroarea)
-    combo_cat = ft.Dropdown(label="Categorie", options=cats)
-    combo_cat.on_change = incarca_modele # Atribuire separata
-    
+    combo_cat = ft.Dropdown(label="Categorie", options=cats, on_change=incarca_modele)
     combo_mod = ft.Dropdown(label="Model Corp (JSON)")
     combo_sina = ft.Dropdown(label="Sina (S)", value="500", options=[ft.dropdown.Option(str(x)) for x in range(300, 650, 50)])
+    
     radio_cant = ft.RadioGroup(
-        content=ft.Row([ft.Radio(value="MDF", label="MDF"), ft.Radio(value="1mm", label="1mm"), ft.Radio(value="2mm", label="2mm")], alignment="center"),
+        content=ft.Row([
+            ft.Radio(value="MDF", label="MDF"), 
+            ft.Radio(value="1mm", label="1mm"), 
+            ft.Radio(value="2mm", label="2mm")
+        ], alignment=ft.MainAxisAlignment.CENTER),
         value="MDF"
     )
+    
     lista_vizuala = ft.Column()
 
-    # --- LAYOUT ---
     page.add(
-        ft.Text("Mobipro Mobile v7.3", size=30, weight="bold"),
+        ft.Text("Mobipro Mobile v7.3", size=25, weight="bold"),
         ft.Row([inp_L, inp_H]),
         ft.Row([inp_A, inp_HA]),
         combo_cat,
         combo_mod,
+        ft.Text("Tip Cant Front:", size=12),
         radio_cant,
         combo_sina,
         ft.Row([
-            ft.ElevatedButton("ADĂUGĂ", icon=ft.Icons.ADD, on_click=adauga_corp, expand=True, style=ft.ButtonStyle(color="white", bgcolor="blue900")),
-            ft.IconButton(icon=ft.Icons.DELETE_FOREVER, on_click=lambda _: [lista_vizuala.controls.clear(), page.update()], icon_color="red")
+            ft.ElevatedButton("ADĂUGĂ", icon=ft.Icons.ADD, on_click=adauga_corp, expand=True, 
+                             style=ft.ButtonStyle(color="white", bgcolor="blue900")),
+            ft.IconButton(icon=ft.Icons.DELETE_FOREVER, 
+                         on_click=lambda _: [lista_vizuala.controls.clear(), page.update()], 
+                         icon_color="red")
         ]),
         ft.Divider(),
         lista_vizuala
     )
 
-ft.app(target=main)
+ft.app(target=main, assets_dir="assets") # Foarte important assets_dir
