@@ -1,0 +1,81 @@
+{
+    "Corp_Jolly": {
+        "metadata": {
+            "constructie": "Laterale pe baza",
+            "versiune": "3.0_le_li"
+        },
+        "piese": [
+            {
+                "nume": "Baza corp Jolly",
+                "L": "L",
+                "l": "A",
+                "cantitate": 1,
+                "fibra": 0,
+                "ABS": {
+                    "L1": 0.4,
+                    "L2": 0,
+                    "l1": 0.4,
+                    "l2": 0.4
+                },
+                "material": "PAL_ALB"
+            },
+            {
+                "nume": "Laterale corp Jolly",
+                "L": "H - 18",
+                "l": "A",
+                "cantitate": 2,
+                "fibra": 0,
+                "ABS": {
+                    "L1": 0.4,
+                    "L2": 0,
+                    "l1": 0,
+                    "l2": 0
+                },
+                "material": "PAL_ALB"
+            },
+            {
+                "nume": "Traverse corp Jolly",
+                "L": "L - 36",
+                "l": 100,
+                "cantitate": 2,
+                "fibra": 0,
+                "ABS": {
+                    "L1": 0.4,
+                    "L2": 0,
+                    "l1": 0,
+                    "l2": 0
+                },
+                "material": "PAL_ALB"
+            },
+            
+            {
+                "nume": "Spate corp (PFL)",
+                "L": "H - 5",
+                "l": "L - 5",
+                "cantitate": 1,
+                "fibra": 0,
+                "ABS": {
+                    "L1": 0,
+                    "L2": 0,
+                    "l1": 0,
+                    "l2": 0
+                },
+                "material": "PFL"
+            },
+            {
+                "nume": "Usa",
+                "L": "H - (2 * le) ",
+                "l": "L - (2 * le)",
+                "cantitate": 1,
+                "fibra": 0,
+                "material": "FRONT",
+                "ABS": {
+                    "L1": "scadere_cant",
+                    "L2": "scadere_cant",
+                    "l1": "scadere_cant",
+                    "l2": "scadere_cant"
+                }
+            }
+        ]
+    }
+}
