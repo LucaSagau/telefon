@@ -2,6 +2,7 @@ import flet as ft
 import json
 import math
 import os
+import sys
 from simpleeval import simple_eval
 
 def main(page: ft.Page):
@@ -9,10 +10,17 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT
     page.scroll = "adaptive"
     page.padding = 20
+
+    # --- LOGICĂ DETECTARE CALE (Fix pentru ecran alb pe Android) ---
+    if getattr(sys, 'frozen', False):
+        # Rulează ca aplicație împachetată (APK)
+        baza_proiect = os.path.dirname(sys.executable)
+    else:
+        # Rulează local în VS Code
+        baza_proiect = os.path.dirname(__file__)
     
-    # IMPORTANTE: Calea trebuie să coincidă cu structura de pe GitHub
-    # Dacă în GitHub ai assets/database/bucatarii/...
-    cale_baza = "assets/database" 
+    # Construim calea către assets/database conform structurii tale
+    cale_baza = os.path.join(baza_proiect, "assets", "database")
 
     # --- FUNCTII ---
     def incarca_modele(e):
@@ -26,13 +34,16 @@ def main(page: ft.Page):
                 combo_mod.value = fisiere[0]
             page.update()
         else:
-            # Debug: afișează o eroare în pagină dacă nu găsește folderul
-            print(f"Calea nu există: {cale_cat}")
+            page.snack_bar = ft.SnackBar(ft.Text(f"Eroare: Calea {cale_cat} nu există!"))
+            page.snack_bar.open = True
+            page.update()
 
     def adauga_corp(e):
         try:
-            v_L, v_H, v_A = float(inp_L.value), float(inp_H.value), float(inp_A.value)
-            v_HA = float(inp_HA.value)
+            v_L = float(inp_L.value) if inp_L.value else 0
+            v_H = float(inp_H.value) if inp_H.value else 0
+            v_A = float(inp_A.value) if inp_A.value else 0
+            v_HA = float(inp_HA.value) if inp_HA.value else 0
             v_S = float(combo_sina.value)
 
             ctx_n = {"L": v_L, "H": v_H, "A": v_A, "HA": v_HA, "S": v_S, "le": 1.5, "li": 2.0, "G": 18}
@@ -42,7 +53,6 @@ def main(page: ft.Page):
             
             with open(cale_json, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                # Luăm prima cheie (numele corpului)
                 structura = data[list(data.keys())[0]]
 
             for p in structura.get("piese", []):
@@ -54,7 +64,7 @@ def main(page: ft.Page):
                     v_c = 1 if radio_cant.value == "1mm" else 2
                     vL -= (v_c * 2); vl -= (v_c * 2)
 
-                lista_vizuala.controls.append(
+                lista_vizuala.controls.insert(0,
                     ft.Card(
                         content=ft.Container(
                             padding=15,
@@ -70,7 +80,6 @@ def main(page: ft.Page):
                 )
             page.update()
         except Exception as ex:
-            # Snackbar pentru erori pe telefon
             page.snack_bar = ft.SnackBar(ft.Text(f"Eroare: {ex}"))
             page.snack_bar.open = True
             page.update()
@@ -81,11 +90,18 @@ def main(page: ft.Page):
     inp_A = ft.TextField(label="A", value="510", expand=1, keyboard_type=ft.KeyboardType.NUMBER)
     inp_HA = ft.TextField(label="HA", value="820", expand=1, keyboard_type=ft.KeyboardType.NUMBER)
 
-    cats = []
-    if os.path.exists(cale_baza):
-        cats = [ft.dropdown.Option(d) for d in os.listdir(cale_baza) if os.path.isdir(os.path.join(cale_baza, d))]
+    # Incarcare categorii cu protectie la erori
+    cats_options = []
+    try:
+        if os.path.exists(cale_baza):
+            dir_list = [d for d in os.listdir(cale_baza) if os.path.isdir(os.path.join(cale_baza, d))]
+            cats_options = [ft.dropdown.Option(d) for d in sorted(dir_list)]
+        else:
+            cats_options = [ft.dropdown.Option("Database negăsit")]
+    except Exception as e:
+        cats_options = [ft.dropdown.Option(f"Eroare: {str(e)}")]
 
-    combo_cat = ft.Dropdown(label="Categorie", options=cats, on_change=incarca_modele)
+    combo_cat = ft.Dropdown(label="Categorie", options=cats_options, on_change=incarca_modele)
     combo_mod = ft.Dropdown(label="Model Corp (JSON)")
     combo_sina = ft.Dropdown(label="Sina (S)", value="500", options=[ft.dropdown.Option(str(x)) for x in range(300, 650, 50)])
     
@@ -120,4 +136,5 @@ def main(page: ft.Page):
         lista_vizuala
     )
 
-ft.app(target=main, assets_dir="assets") # Foarte important assets_dir
+# Pornire aplicatie cu folderul de resurse definit
+ft.app(target=main, assets_dir="assets")
