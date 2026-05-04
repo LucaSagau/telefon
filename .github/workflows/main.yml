@@ -1,5 +1,30 @@
-- name: Build APK
+name: Build Mobipro APK
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install flet simpleeval
-          # Forțăm acceptarea licențelor și build-ul în mod release curat
-          yes | flet build apk --release --verbose
+
+      - name: Build APK
+        run: |
+          # Am scos --release deoarece cauza eroare si am lasat --verbose pentru detalii
+          yes | flet build apk --verbose
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mobipro-APK
+          path: build/apk/*.apk
