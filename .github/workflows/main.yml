@@ -20,7 +20,8 @@ jobs:
 
       - name: Build APK
         run: |
-          yes | flet build apk --release --verbose
+          # Am scos --release deoarece cauza eroare si am lasat --verbose pentru detalii
+          yes | flet build apk --verbose
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
